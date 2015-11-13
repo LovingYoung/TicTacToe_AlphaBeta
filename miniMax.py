@@ -61,14 +61,32 @@ class miniMax:
             self._search()
             self.changed = False
         self.printCurrent()
-        a = self._root.isCompleteAndMessage()
+        a = self.isCompleteAndMessage(self._root.getStatus())
+        if a[0] == True:
+            return a[1]
+        ne = self._bestPath[-2].getStatus()
+        a = self.isCompleteAndMessage(ne)
+        self.setCurrent(ne)
+        self.printCurrent()
         if a[0] == False:
-            self.setCurrent(self._bestPath[-2].getStatus())
-            self.printCurrent()
             return self._current
         else:
-            self.printCurrent()
             return a[1]
+
+
+    def isCompleteAndMessage(self,cur):
+        pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
+        for i in pos:
+            if cur[i[0]] * cur[i[1]] * cur[i[2]] == 1:
+                return (True, 'MAX Player Win')
+            if cur[i[0]] * cur[i[1]] * cur[i[2]] == 8:
+                return (True, 'MIN Player Win')
+
+        for i in cur:
+            if i == 0:
+                return (False, 'Game Continue')
+
+        return (True, 'Draw Game')
 
     def printCurrent(self):
         self._root.printArray(self._current)

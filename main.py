@@ -15,6 +15,9 @@ newGame = miniMax.miniMax()
 init = [0] * 9
 while True:
     come = int(input("Please input where to put --> "))
+    if come > 9 or come < 1:
+        print("Sorry, Illegal index")
+        continue
     come -= 1
     if init[come] != 0:
         print("Sorry, Illegal index")
