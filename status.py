@@ -38,8 +38,8 @@ class status:
                 minPlayer += 1
             else:
                 maxPlayer += 1
-
-        return maxPlayer - minPlayer
+        self._priority = maxPlayer - minPlayer
+        return self._priority
 
     def _calPathAndPriority(self, init = []):
         if len(self._sons) == 0:
@@ -52,6 +52,7 @@ class status:
             temp = max(sonsPriority)
         else:
             temp = min(sonsPriority)
+        self._priority = temp[0]
         temp[1].append(self)
         return temp
 
@@ -65,6 +66,16 @@ class status:
 
     def printStatus(self):
         cur = self._st
+        j = 0
+        for i in cur:
+            if j == 3:
+                print("")
+                j = 0
+            print(self._printChar(i) + '|', end=" ")
+            j += 1
+        print("")
+
+    def printArray(self, cur):
         j = 0
         for i in cur:
             if j == 3:

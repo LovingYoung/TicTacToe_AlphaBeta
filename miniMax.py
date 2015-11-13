@@ -1,7 +1,7 @@
 import status
 
 class miniMax:
-    def __init__(self, depth = 7, alphaBeta = False):
+    def __init__(self, depth = 5, alphaBeta = False, init = [0] * 9):
         self._searchPath = []
         self.judgePath = []
         self.changed = True
@@ -10,6 +10,7 @@ class miniMax:
         self._priority = None
         self._bestPath = None
         self._root = None
+        self._current = init
 
     #Set
 
@@ -21,10 +22,21 @@ class miniMax:
         self.depth = depth
         self.changed = True
 
+    def setCurrent(self, current):
+        self._current = current
+        self.changed = True
+
     #Get
 
     def getDepth(self):
         return self.depth
+
+    def isComplete(self):
+        if self.changed == True or self._priority == None:
+            self._search()
+            self.changed = False
+        ans = self._root.isCompleteAndMessage
+        return ans[0]
 
     def getSearchPath(self):
         if self.changed == True:
@@ -43,6 +55,24 @@ class miniMax:
             self._search()
             self.changed = False
         return self._bestPath
+
+    def getNext(self):
+        if self.changed == True or self._priority == None:
+            self._search()
+            self.changed = False
+        self.printCurrent()
+        a = self._root.isCompleteAndMessage()
+        if a[0] == False:
+            self.setCurrent(self._bestPath[-2].getStatus())
+            self.printCurrent()
+            return self._current
+        else:
+            self.printCurrent()
+            return a[1]
+
+    def printCurrent(self):
+        self._root.printArray(self._current)
+        print("")
 
    #Modify Functions
     def createSons(self, st, max = True):
@@ -75,8 +105,7 @@ class miniMax:
         mySet = set([])
         myStack = []
         isMax = True
-        self._root = status.status()
-        self._root.printStatus()
+        self._root = status.status(status = self._current)
 
         myStack.append(self._root)
 
