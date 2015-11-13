@@ -8,6 +8,8 @@ class miniMax:
         self.depth = depth
         self.alphaBeta = alphaBeta
         self._priority = None
+        self._bestPath = None
+        self._root = None
 
     #Set
 
@@ -30,19 +32,19 @@ class miniMax:
             self.changed = False
         return self._searchPath
 
-    def getJudgePath(self):
-        if self.changed == True:
-            self._search()
-            self.changed = False
-        return self.judgePath
-
     def getPriority(self):
         if self.changed == True or self._priority == None:
             self._search()
             self.changed = False
         return self._priority
 
-    #Modify Functions
+    def getBestPath(self):
+        if self.changed == True or self._priority == None:
+            self._search()
+            self.changed = False
+        return self._bestPath
+
+   #Modify Functions
     def createSons(self, st, max = True):
         ans = []
         if max == True:
@@ -73,15 +75,16 @@ class miniMax:
         mySet = set([])
         myStack = []
         isMax = True
-        root = status.status()
+        self._root = status.status()
+        self._root.printStatus()
 
-        myStack.append(root)
+        myStack.append(self._root)
 
         while len(myStack) > 0:
             cur = myStack.pop()
             (complete, message) = cur.isCompleteAndMessage()
             if complete == True:
-                break
+                continue
 
             if cur.getLevel() > self.depth:
                 continue
@@ -95,10 +98,11 @@ class miniMax:
                     cur.addSonFromArray(i)
 
                 sons = set(cur.getSons())
+                cur.setSons(sons)
 
                 for i in sons:
                     myStack.append(i)
 
         self._searchPath = searchPath
-        self._priority = root.getPriority()
-
+        self._priority = self._root.getPriority()
+        self._bestPath = self._root.getBestPath()

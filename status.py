@@ -6,6 +6,7 @@ class status:
         self._sons = []
         self._parent = myParent
         self._max = MAX
+        self._most = None
         if self._parent != None:
             self._parent.addSon(self)
             self._level = self._parent.getLevel() + 1
@@ -40,6 +41,40 @@ class status:
 
         return maxPlayer - minPlayer
 
+    def _calPathAndPriority(self, init = []):
+        if len(self._sons) == 0:
+            return (self._calPriority(), [self])
+
+        sonsPriority = []
+        for i in self._sons:
+            sonsPriority.append(i._calPathAndPriority())
+        if self._max == True:
+            temp = max(sonsPriority)
+        else:
+            temp = min(sonsPriority)
+        temp[1].append(self)
+        return temp
+
+    def _printChar(self, c):
+        if c == 1:
+            return 'O'
+        if c == 0:
+            return ' '
+        if c == 2:
+            return 'X'
+
+    def printStatus(self):
+        cur = self._st
+        j = 0
+        for i in cur:
+            if j == 3:
+                print("")
+                j = 0
+            print(self._printChar(i) + '|', end=" ")
+            j += 1
+        print("")
+
+
     # Get functions
 
     def getPriority(self):
@@ -52,20 +87,9 @@ class status:
             return self._priority
 
         else:
-            if self._max == True:
-                ret = self._sons[0].getPriority()
-                for i in self._sons:
-                    if i.getPriority() > ret:
-                        ret = i.getPriority()
-                    self._priority = ret
-                return self._priority
-            else:
-                ret = self._sons[0].getPriority()
-                for i in self._sons:
-                    if i.getPriority() < ret:
-                        ret = i.getPriority()
-                    self._priority = ret
-                    return self._priority
+            (self._priority, self._most) = self._calPathAndPriority()
+            self._changed = False
+            return self._priority
 
     def getLevel(self):
         return self._level
@@ -79,7 +103,22 @@ class status:
     def getSons(self):
         return self._sons
 
+    def getBestPath(self):
+        if self._priority != None and self._changed == False:
+            return self._most
+
+        if self._sons == []:
+            return []
+
+        else:
+            self.getPriority()
+            return self._most
+
     #Modify Functions
+
+    def setSons(self, sons):
+        self._sons = sons
+        return
 
     def addSon(self, son):
         self._sons.append(son)
