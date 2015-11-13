@@ -4,7 +4,7 @@ a = miniMax.miniMax()
 
 b = a.getSearchPath()
 
-for i in b:
-    print(i.getStatus())
-
 print(a.getPriority())
+
+for i in a.getBestPath():
+    print(i.getStatus())
