@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Tictactoe.qml</file>
+        <file>First.png</file>
+        <file>icon.png</file>
+        <file>Last.jpg</file>
+        <file>all.png</file>
+        <file>board.png</file>
+        <file>main.cpp</file>
+        <file>O.png</file>
+        <file>X.png</file>
+        <file>Piece.qml</file>
+        <file>empty.png</file>
+        <file>MyDialog.qml</file>
+        <file>util.js</file>
+    </qresource>
+</RCC>
