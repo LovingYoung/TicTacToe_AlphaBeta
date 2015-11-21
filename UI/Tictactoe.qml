@@ -1,6 +1,7 @@
 import QtQuick 2.0
 
 Rectangle{
+    id:board
     width:500
     height:500
     color:"transparent"
@@ -20,6 +21,31 @@ Rectangle{
         if(number == 8) piece8.changeState(state)
         if(number == 9) piece9.changeState(state)
     }
+
+    function showStatus(){
+        var arr = new Array()
+        arr[0] = piece1.showStatus()
+        arr[1] = piece2.showStatus()
+        arr[2] = piece3.showStatus()
+        arr[3] = piece4.showStatus()
+        arr[4] = piece5.showStatus()
+        arr[5] = piece6.showStatus()
+        arr[6] = piece7.showStatus()
+        arr[7] = piece8.showStatus()
+        arr[8] = piece9.showStatus()
+        return arr
+    }
+
+    function setStatus(arr){
+        for(var i = 0; i < 9; i++){
+            if(arr[i] == 0) continue
+            else if(arr[i] == 1)
+                board.changeState((i+1), "X");
+            else
+                board.changeState((i+1), "O");
+        }
+    }
+
 
     Piece{
         id:piece1

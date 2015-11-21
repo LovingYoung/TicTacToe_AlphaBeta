@@ -10,11 +10,21 @@ Rectangle{
     property string status: main.status
 
     function changeState(s){
-        if(s != "X" && s != "Y") return
+        if(s != "X" && s != "O") return
         if(s == "X"){
             piece.state = "X"
         } else {
-            piece.state = "Y"
+            piece.state = "O"
+        }
+    }
+
+    function showStatus(){
+        if (piece.state == ""){
+            return 0;
+        } else if (piece.state == "X"){
+            return 1;
+        } else if (piece.state == "O"){
+            return 2;
         }
     }
 
@@ -29,7 +39,9 @@ Rectangle{
         onClicked:{
             if (main.status != "In the Game" && piece.state == "") return
             else{
-                UTIL.gameClick(piece.number)
+                var arr = board.showStatus()
+                var newarr = UTIL.gameClick(arr, piece.number);
+                board.setStatus(newarr);
             }
         }
     }

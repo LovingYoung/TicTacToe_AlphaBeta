@@ -36,14 +36,21 @@ function initial(){
     }
 }
 
-function gameClick(){
+function gameClick(arr, number){
     if(playerIsX()){
         piece.state = "X"
+        arr[number-1] = 1;
     } else{
         piece.state = "O"
+        arr[number-1] = 2;
     }
     //TODO
-
+    media.status = arr;
+    console.log(arr);
+    media.nextStep();
+    var newarr = media.status;
+    console.log("Get:" + newarr);
+    return newarr;
 }
 
 function playerIsX(){
@@ -53,3 +60,4 @@ function playerIsX(){
         return false
     }
 }
+
