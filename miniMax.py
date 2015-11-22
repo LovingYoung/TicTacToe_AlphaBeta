@@ -60,14 +60,14 @@ class miniMax:
             self.changed = False
         a = self.isCompleteAndMessage(self._root.getStatus())
         if a[0] == True:
-            return a[1]
+            return [1, a[1]] + self._root.getStatus()
         ne = self._bestPath[-2].getStatus()
         a = self.isCompleteAndMessage(ne)
         if a[0] == False:
             self.setCurrent(ne)
-            return ne
+            return [0, 0]+ne
         else:
-            return a[1]
+            return [1, a[1]] + ne
 
 
     def isCompleteAndMessage(self,cur):
@@ -80,9 +80,9 @@ class miniMax:
 
         for i in cur:
             if i == 0:
-                return (False, 'Game Continue')
+                return (False, 0)
 
-        return (True, 'Draw Game')
+        return (True, 0)
 
     def printCurrent(self):
         self._root.printArray(self._current)

@@ -77,7 +77,7 @@ class status:
             if j == 3:
                 print("")
                 j = 0
-            print(self._printChar(i) + '|', end=" ")
+            print(self._printChar(i) + '|')
             j += 1
         print("")
 
@@ -87,7 +87,7 @@ class status:
             if j == 3:
                 print("")
                 j = 0
-            print(self._printChar(i) + '|', end=" ")
+            print(self._printChar(i) + '|')
             j += 1
         print("")
 
