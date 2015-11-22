@@ -20,9 +20,9 @@ class status:
         maxPlayer = 0
 
         (win, who) = self.isCompleteAndMessage()
-        if win == True and who[:3] == 'MAX':
+        if win == True and who == 1:
             return -100 + self._level
-        if win == True and who[:3] == 'MIN':
+        if win == True and who == 2:
             return 100 - self._level
 
         pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
@@ -156,15 +156,15 @@ class status:
         pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
         for i in pos:
             if self._st[i[0]] * self._st[i[1]] * self._st[i[2]] == 1:
-                return (True, 'MAX Player Win')
+                return (True, 1)
             if self._st[i[0]] * self._st[i[1]] * self._st[i[2]] == 8:
-                return (True, 'MIN Player Win')
+                return (True, 2)
 
         for i in self._st:
             if i == 0:
-                return (False, 'Game Continue')
+                return (False, 0)
 
-        return (True, 'Draw Game')
+        return (True, 0)
 
 
     #Build-in Function

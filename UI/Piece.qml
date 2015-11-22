@@ -38,10 +38,10 @@ Rectangle{
         anchors.fill:parent
         onClicked:{
             if (main.status != "In the Game" && piece.state == "") return
+            if (piece.state == "X" || piece.state == "O") return
             else{
                 var arr = board.showStatus()
                 var newarr = UTIL.gameClick(arr, piece.number);
-                board.setStatus(newarr);
             }
         }
     }
@@ -61,6 +61,14 @@ Rectangle{
             PropertyChanges {
                 target: myImage
                 source: "X.png"
+            }
+        },
+        State {
+            name: "EMPTY"
+
+            PropertyChanges {
+                target: myImage
+                source: "empty.png"
             }
         }
     ]

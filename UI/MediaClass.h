@@ -11,11 +11,16 @@ class MediaClass : public QObject
     Q_OBJECT
     Q_PROPERTY(int isComplete READ isComplete)
     Q_PROPERTY(QList<int> status READ status WRITE writeStatus)
+    Q_PROPERTY(int winner READ winner)
 public:
     MediaClass(QObject *parent = 0):QObject(parent){};
 
     int isComplete(){
         return complete;
+    }
+
+    int winner(){
+        return m_winner;
     }
 
     QList<int> status(){
@@ -76,9 +81,12 @@ public:
             PyErr_Print();
         }
 
-        for(int i = 0; i < 9; i++){
+        complete = PyLong_AsLong(PyList_GetItem(presult, 0));
+        m_winner = PyLong_AsLong(PyList_GetItem(presult, 1));
+
+        for(int i = 2; i < 11; i++){
             auto temp = PyList_GetItem(presult,i);
-            m_status[i] = PyLong_AsLong(temp);
+            m_status[i-2] = PyLong_AsLong(temp);
         }
 
         Py_DECREF(pValue);
@@ -98,6 +106,7 @@ public slots:
 private:
     int complete = 0;
     QList<int> m_status;
+    int m_winner = 0;
 };
 
 #endif // MEDIACLASS_H

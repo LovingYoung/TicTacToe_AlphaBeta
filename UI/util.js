@@ -28,11 +28,31 @@ function settings(m_position,m_difficult){
 
     main.status = "In the Game"
     initial()
+    if(main.position == "后手"){
+        var tempArr = new Array();
+        for(var i = 0; i < 9; i++){
+            tempArr[i] = 0;
+        }
+        gameStart(tempArr);
+    }
 }
 
 function initial(){
     for(var i = 1; i <= 9; i++){
-        tictactoe.changeState(i, "")
+        tictactoe.changeState(i, "EMPTY");
+    }
+    tictactoe.setStatus([0,0,0,0,0,0,0,0,0]);
+}
+
+function gameStart(arr){
+    media.status = arr;
+    media.nextStep()
+    var newarr = media.status
+    tictactoe.setStatus(newarr);
+    var isComplete = media.isComplete;
+    var winner = media.winner;
+    if(isComplete != 0){
+        afterComplete(winner);
     }
 }
 
@@ -44,20 +64,23 @@ function gameClick(arr, number){
         piece.state = "O"
         arr[number-1] = 2;
     }
-    //TODO
-    media.status = arr;
-    console.log(arr);
-    media.nextStep();
-    var newarr = media.status;
-    console.log("Get:" + newarr);
-    return newarr;
+    var isComplete = media.isComplete;
+    var winner = media.winner;
+    if(isComplete != 0){
+        afterComplete(winner);
+    }
+    gameStart(arr);
 }
 
 function playerIsX(){
-    if (main.position == "先手"){
-        return true
-    } else{
-        return false
-    }
+    return true
 }
 
+function afterComplete(winner){
+    if(winner == 1)
+        main.status = "Game Complete, Winner is Player";
+    if(winner == 2)
+        main.status = "Game Complete, Winner is Computer";
+    else
+        main.status = "Game Complete, Draw Game";
+}

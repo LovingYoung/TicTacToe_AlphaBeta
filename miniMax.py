@@ -12,8 +12,6 @@ class miniMax:
         self._root = None
         self._current = init
 
-    #Set
-
     def setDepth(self, depth):
         self.depth = depth
         return depth
@@ -35,7 +33,7 @@ class miniMax:
         if self.changed == True or self._priority == None:
             self._search()
             self.changed = False
-        ans = self._root.isCompleteAndMessage
+        ans = self._root.isCompleteAndMessage()
         return ans[0]
 
     def getSearchPath(self):
@@ -60,16 +58,14 @@ class miniMax:
         if self.changed == True or self._priority == None:
             self._search()
             self.changed = False
-        self.printCurrent()
         a = self.isCompleteAndMessage(self._root.getStatus())
         if a[0] == True:
             return a[1]
         ne = self._bestPath[-2].getStatus()
         a = self.isCompleteAndMessage(ne)
-        self.setCurrent(ne)
-        self.printCurrent()
         if a[0] == False:
-            return self._current
+            self.setCurrent(ne)
+            return ne
         else:
             return a[1]
 
@@ -78,9 +74,9 @@ class miniMax:
         pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
         for i in pos:
             if cur[i[0]] * cur[i[1]] * cur[i[2]] == 1:
-                return (True, 'MAX Player Win')
+                return (True, 1)
             if cur[i[0]] * cur[i[1]] * cur[i[2]] == 8:
-                return (True, 'MIN Player Win')
+                return (True, 2)
 
         for i in cur:
             if i == 0:
