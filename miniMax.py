@@ -114,7 +114,6 @@ class miniMax:
 
     def _search(self):
         searchPath = []
-        judgePath = []
 
         mySet = set([])
         myStack = []
@@ -135,7 +134,7 @@ class miniMax:
             if cur not in mySet:
                 searchPath.append(cur)
                 sta = cur.getStatus()
-                sons = self.createSons(sta,max = cur.getMax())
+                sons = self.createSons(sta,max=cur.getMax())
 
                 for i in sons:
                     cur.addSonFromArray(i)
@@ -147,5 +146,6 @@ class miniMax:
                     myStack.append(i)
 
         self._searchPath = searchPath
-        self._priority = self._root.getPriority()
+        self._priority = self._root.getPriority(alphaBeta=self.alphaBeta)
         self._bestPath = self._root.getBestPath()
+

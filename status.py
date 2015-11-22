@@ -7,6 +7,7 @@ class status:
         self._parent = myParent
         self._max = MAX
         self._most = None
+        self.otherStatus = None
         if self._parent != None:
             self._parent.addSon(self)
             self._level = self._parent.getLevel() + 1
@@ -62,6 +63,60 @@ class status:
         temp[1].append(self)
         return temp
 
+    def _calPathAndPriority_alphaBeta(self, init = []):
+        if len(self._sons) == 0:
+            return (self._calPriority(), [self])
+
+        choose = None
+        if self._parent == None:
+            sonsPriority = []
+            for i in self._sons:
+                sonsPriority.append(i._calPathAndPriority_alphaBeta())
+            if self._max:
+                temp = max(sonsPriority)
+            else:
+                temp = min(sonsPriority)
+            self._priority = temp[0]
+            temp[1].append(self)
+            return temp
+        else:
+            for i in self._sons:
+                theone = i._calPathAndPriority_alphaBeta()
+                if self._max:
+                    if self.otherStatus == None:
+                        self.otherStatus = theone
+                    else:
+                        if theone[0] < self.otherStatus[0]:
+                            continue
+                        else:
+                            self.otherStatus = theone
+                    if self._parent.otherStatus != None and self._parent.otherStatus[0] <= self.otherStatus[0]:
+                        return (self.otherStatus[0], [self])
+
+                else:
+                    if self.otherStatus == None:
+                        self.otherStatus = theone
+                    else:
+                        if theone[0] > self.otherStatus[0]:
+                            continue
+                        else:
+                            self.otherStatus = theone
+                    if self._parent.otherStatus != None and self._parent.otherStatus[0] >= self.otherStatus[0]:
+                        return (self.otherStatus[0], [self])
+            self._priority = self.otherStatus[0]
+            temp = self.otherStatus[1]
+            temp.append(self)
+            if self._parent.otherStatus == None:
+                self._parent.otherStatus = (self._priority, temp)
+            elif self._max:
+                if self._parent.otherStatus[0] > self._priority:
+                    self._parent.otherStatus = (self._priority, temp)
+            else:
+                if self._parent.otherStatus[0] < self._priority:
+                    self._parent.otherStatus = (self._priority,temp)
+            print(self._level * 4 * ' ' + "Priority:" + str(self._priority))
+            return (self._priority, temp)
+
     def _printChar(self, c):
         if c == 1:
             return 'O'
@@ -94,7 +149,10 @@ class status:
 
     # Get functions
 
-    def getPriority(self):
+    def getParent(self):
+        return self._parent
+
+    def getPriority(self, alphaBeta = False):
         if self._priority != None and self._changed == False:
             return self._priority
 
@@ -104,7 +162,10 @@ class status:
             return self._priority
 
         else:
-            (self._priority, self._most) = self._calPathAndPriority()
+            if alphaBeta:
+                (self._priority, self._most) = self._calPathAndPriority_alphaBeta()
+            else:
+                (self._priority, self._most) = self._calPathAndPriority()
             self._changed = False
             return self._priority
 
