@@ -1,12 +1,7 @@
 import status
 
 class miniMax:
-<<<<<<< HEAD
-    def __init__(self, depth = 7, alphaBeta = False, init = [0] * 9):
-        self._searchPath = []
-=======
     def __init__(self, depth = 5, alphaBeta = False, init = [0] * 9):
->>>>>>> UI
         self.judgePath = []
         self.changed = True
         self.depth = depth
