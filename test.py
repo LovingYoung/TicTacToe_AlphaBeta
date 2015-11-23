@@ -15,7 +15,7 @@ newGame = None
 
 def initGame(arr):
     global newGame
-    newGame = miniMax.miniMax(alphaBeta=True, depth=5)
+    newGame = miniMax.miniMax(alphaBeta=True, depth=3)
     newGame.setCurrent(arr)
 
 

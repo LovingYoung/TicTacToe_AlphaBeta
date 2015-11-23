@@ -3,7 +3,7 @@ class status:
         self._st =  status
         self._priority = None
         self._changed = True
-        self._sons = []
+        self._sons = set([])
         self._parent = myParent
         self._max = MAX
         self._most = None
@@ -48,13 +48,45 @@ class status:
         self._priority = maxPlayer - minPlayer
         return self._priority
 
-    def _calPathAndPriority(self, init = []):
-        if len(self._sons) == 0:
+    def isHaveSons(self, upboundLevel = 5):
+        if self._level > upboundLevel:
+            return False
+        else:
+            return not self.isCompleteAndMessage()[0]
+
+    def createSonsList(self):
+        st = self._st
+        ans = []
+        if self._max:
+            flag = 2
+        else:
+            flag = 1
+        a = []
+        i = 0
+        while i < len(st):
+            if st[i] == 0:
+                a.append(i)
+            i += 1
+
+        ans = []
+        i = 0
+        while i < len(a):
+            new = list(st)
+            new[a[i]] = flag
+            ans.append(new)
+            i += 1
+        return ans
+
+    def _calPathAndPriority(self, init = [], upboundLevel = 5):
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             return (self._calPriority(), [self])
 
+        sonsList = self.createSonsList()
+
         sonsPriority = []
-        for i in self._sons:
-            sonsPriority.append(i._calPathAndPriority())
+        for i in sonsList:
+            thisSon = self.addSonFromArray(i)
+            sonsPriority.append(thisSon._calPathAndPriority())
         if self._max == True:
             temp = max(sonsPriority)
         else:
@@ -63,15 +95,19 @@ class status:
         temp[1].append(self)
         return temp
 
-    def _calPathAndPriority_alphaBeta(self, init = []):
-        if len(self._sons) == 0:
+    def _calPathAndPriority_alphaBeta(self, init = [], upboundLevel=5):
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             return (self._calPriority(), [self])
 
-        choose = None
+        sonList = self.createSonsList()
+
         if self._parent == None:
             sonsPriority = []
-            for i in self._sons:
-                sonsPriority.append(i._calPathAndPriority_alphaBeta())
+            for i in sonList:
+                thisSon = self.addSonFromArray(i)
+                if thisSon is None:
+                    continue
+                sonsPriority.append(thisSon._calPathAndPriority_alphaBeta())
             if self._max:
                 temp = max(sonsPriority)
             else:
@@ -80,8 +116,11 @@ class status:
             temp[1].append(self)
             return temp
         else:
-            for i in self._sons:
-                theone = i._calPathAndPriority_alphaBeta()
+            for i in sonList:
+                thisSon = self.addSonFromArray(i)
+                if thisSon is None:
+                    continue
+                theone = thisSon._calPathAndPriority_alphaBeta()
                 if self._max:
                     if self.otherStatus == None:
                         self.otherStatus = theone
@@ -114,7 +153,6 @@ class status:
             else:
                 if self._parent.otherStatus[0] < self._priority:
                     self._parent.otherStatus = (self._priority,temp)
-            print(self._level * 4 * ' ' + "Priority:" + str(self._priority))
             return (self._priority, temp)
 
     def _printChar(self, c):
@@ -152,20 +190,20 @@ class status:
     def getParent(self):
         return self._parent
 
-    def getPriority(self, alphaBeta = False):
+    def getPriority(self, alphaBeta = False, upboundLevel=5):
         if self._priority != None and self._changed == False:
             return self._priority
 
-        if self._sons == []:
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             self._priority = self._calPriority()
             self._changed = False
             return self._priority
 
         else:
             if alphaBeta:
-                (self._priority, self._most) = self._calPathAndPriority_alphaBeta()
+                (self._priority, self._most) = self._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel)
             else:
-                (self._priority, self._most) = self._calPathAndPriority()
+                (self._priority, self._most) = self._calPathAndPriority(upboundLevel=upboundLevel)
             self._changed = False
             return self._priority
 
@@ -181,15 +219,15 @@ class status:
     def getSons(self):
         return self._sons
 
-    def getBestPath(self):
+    def getBestPath(self, alphaBeta=False, upboundLevel=5):
         if self._priority != None and self._changed == False:
             return self._most
 
-        if self._sons == []:
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             return []
 
         else:
-            self.getPriority()
+            self.getPriority(alphaBeta=alphaBeta, upboundLevel=upboundLevel)
             return self._most
 
     #Modify Functions
@@ -199,12 +237,27 @@ class status:
         return
 
     def addSon(self, son):
-        self._sons.append(son)
+        self._sons.add(son)
         return
 
+    def addParent(self, parent):
+        if self._parent is None:
+            self._parent = parent
+            parent.addSon(self)
+            self._level = parent.getLevel() + 1
+            return True
+        else:
+            return False
+
+
     def addSonFromArray(self, arr):
-        son = status(arr, myParent=self, MAX=not self.getMax())
-        return
+        son = status(arr, myParent=None, MAX=not self.getMax())
+        if son not in self._sons:
+            self._sons.add(son)
+            son.addParent(self)
+            return son
+        else:
+            return None
 
     def deleteSon(self, son):
         if son in self._sons:
