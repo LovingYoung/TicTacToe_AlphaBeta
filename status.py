@@ -1,12 +1,15 @@
+# coding: utf-8
 class status:
     def __init__(self, status = 9 * [0], myParent = None, MAX = True):
         self._st =  status
         self._priority = None
         self._changed = True
-        self._sons = []
+        self._sons = set([])
         self._parent = myParent
         self._max = MAX
         self._most = None
+        self.otherStatus = None
+        self.nodeSum = 1
         if self._parent != None:
             self._parent.addSon(self)
             self._level = self._parent.getLevel() + 1
@@ -20,10 +23,12 @@ class status:
         maxPlayer = 0
 
         (win, who) = self.isCompleteAndMessage()
-        if win == True and who[:3] == 'MAX':
-            return -100 + self._level
-        if win == True and who[:3] == 'MIN':
-            return 100 - self._level
+        if win == True and who == 1:
+            self._priority = -100 + self._level
+            return self._priority
+        if win == True and who == 2:
+            self._priority = 100 - self._level
+            return self._priority
 
         pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 
@@ -47,13 +52,47 @@ class status:
         self._priority = maxPlayer - minPlayer
         return self._priority
 
-    def _calPathAndPriority(self, init = []):
-        if len(self._sons) == 0:
+    def isHaveSons(self, upboundLevel = 5):
+        if self._level > upboundLevel:
+            return False
+        else:
+            return not self.isCompleteAndMessage()[0]
+
+    def createSonsList(self):
+        st = self._st
+        ans = []
+        if self._max:
+            flag = 2
+        else:
+            flag = 1
+        a = []
+        i = 0
+        while i < len(st):
+            if st[i] == 0:
+                a.append(i)
+            i += 1
+
+        ans = []
+        i = 0
+        while i < len(a):
+            new = list(st)
+            new[a[i]] = flag
+            ans.append(new)
+            i += 1
+        return ans
+
+    def _calPathAndPriority(self, init = [], upboundLevel = 5):
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             return (self._calPriority(), [self])
 
+        sonsList = self.createSonsList()
+
         sonsPriority = []
-        for i in self._sons:
-            sonsPriority.append(i._calPathAndPriority())
+        for i in sonsList:
+            thisSon = self.addSonFromArray(i)
+            if thisSon is None:
+                continue
+            sonsPriority.append(thisSon._calPathAndPriority(upboundLevel=upboundLevel))
         if self._max == True:
             temp = max(sonsPriority)
         else:
@@ -61,6 +100,66 @@ class status:
         self._priority = temp[0]
         temp[1].append(self)
         return temp
+
+    def _calPathAndPriority_alphaBeta(self, init = [], upboundLevel=5):
+        if not self.isHaveSons(upboundLevel=upboundLevel):
+            return (self._calPriority(), [self])
+
+        sonList = self.createSonsList()
+
+        if self._parent == None:
+            sonsPriority = []
+            for i in sonList:
+                thisSon = self.addSonFromArray(i)
+                if thisSon is None:
+                    continue
+                sonsPriority.append(thisSon._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel))
+            if self._max:
+                temp = max(sonsPriority)
+            else:
+                temp = min(sonsPriority)
+            self._priority = temp[0]
+            temp[1].append(self)
+            return temp
+        else:
+            for i in sonList:
+                thisSon = self.addSonFromArray(i)
+                if thisSon is None:
+                    continue
+                theone = thisSon._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel)
+                if self._max:
+                    if self.otherStatus == None:
+                        self.otherStatus = theone
+                    else:
+                        if theone[0] < self.otherStatus[0]:
+                            continue
+                        else:
+                            self.otherStatus = theone
+                    if self._parent.otherStatus != None and self._parent.otherStatus[0] <= self.otherStatus[0]:
+                        return (self.otherStatus[0], [self])
+
+                else:
+                    if self.otherStatus == None:
+                        self.otherStatus = theone
+                    else:
+                        if theone[0] > self.otherStatus[0]:
+                            continue
+                        else:
+                            self.otherStatus = theone
+                    if self._parent.otherStatus != None and self._parent.otherStatus[0] >= self.otherStatus[0]:
+                        return (self.otherStatus[0], [self])
+            self._priority = self.otherStatus[0]
+            temp = self.otherStatus[1]
+            temp.append(self)
+            if self._parent.otherStatus == None:
+                self._parent.otherStatus = (self._priority, temp)
+            elif self._max:
+                if self._parent.otherStatus[0] > self._priority:
+                    self._parent.otherStatus = (self._priority, temp)
+            else:
+                if self._parent.otherStatus[0] < self._priority:
+                    self._parent.otherStatus = (self._priority,temp)
+            return (self._priority, temp)
 
     def _printChar(self, c):
         if c == 1:
@@ -77,7 +176,7 @@ class status:
             if j == 3:
                 print("")
                 j = 0
-            print(self._printChar(i) + '|', end=" ")
+            print(self._printChar(i) + '|')
             j += 1
         print("")
 
@@ -87,24 +186,30 @@ class status:
             if j == 3:
                 print("")
                 j = 0
-            print(self._printChar(i) + '|', end=" ")
+            print(self._printChar(i) + '|')
             j += 1
         print("")
 
 
     # Get functions
 
-    def getPriority(self):
+    def getParent(self):
+        return self._parent
+
+    def getPriority(self, alphaBeta = False, upboundLevel=5):
         if self._priority != None and self._changed == False:
             return self._priority
 
-        if self._sons == []:
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             self._priority = self._calPriority()
             self._changed = False
             return self._priority
 
         else:
-            (self._priority, self._most) = self._calPathAndPriority()
+            if alphaBeta:
+                (self._priority, self._most) = self._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel)
+            else:
+                (self._priority, self._most) = self._calPathAndPriority(upboundLevel=upboundLevel)
             self._changed = False
             return self._priority
 
@@ -120,15 +225,15 @@ class status:
     def getSons(self):
         return self._sons
 
-    def getBestPath(self):
+    def getBestPath(self, alphaBeta=False, upboundLevel=5):
         if self._priority != None and self._changed == False:
             return self._most
 
-        if self._sons == []:
+        if not self.isHaveSons(upboundLevel=upboundLevel):
             return []
 
         else:
-            self.getPriority()
+            self.getPriority(alphaBeta=alphaBeta, upboundLevel=upboundLevel)
             return self._most
 
     #Modify Functions
@@ -138,12 +243,27 @@ class status:
         return
 
     def addSon(self, son):
-        self._sons.append(son)
+        self._sons.add(son)
         return
 
+    def addParent(self, parent):
+        if self._parent is None:
+            self._parent = parent
+            parent.addSon(self)
+            self._level = parent.getLevel() + 1
+            return True
+        else:
+            return False
+
+
     def addSonFromArray(self, arr):
-        son = status(arr, myParent=self, MAX=not self.getMax())
-        return
+        son = status(arr, myParent=None, MAX=not self.getMax())
+        if son not in self._sons:
+            self._sons.add(son)
+            son.addParent(self)
+            return son
+        else:
+            return None
 
     def deleteSon(self, son):
         if son in self._sons:
@@ -156,15 +276,15 @@ class status:
         pos = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
         for i in pos:
             if self._st[i[0]] * self._st[i[1]] * self._st[i[2]] == 1:
-                return (True, 'MAX Player Win')
+                return (True, 1)
             if self._st[i[0]] * self._st[i[1]] * self._st[i[2]] == 8:
-                return (True, 'MIN Player Win')
+                return (True, 2)
 
         for i in self._st:
             if i == 0:
-                return (False, 'Game Continue')
+                return (False, 0)
 
-        return (True, 'Draw Game')
+        return (True, 0)
 
 
     #Build-in Function
@@ -205,3 +325,44 @@ class status:
         else:
             return False
 
+
+    def printTree(self, level = 1, parent = -1, up = list(), lastChild = False):
+        if parent == -1:
+            prefix = '└── '
+        else:
+            if parent not in up:
+                up.append(parent)
+            prefix = list(4 * level * ' ')
+            for i in up:
+                prefix[i] = '│'
+            if lastChild:
+                prefix[parent] = '└'
+                up.remove(parent)
+            else:
+                prefix[parent] = '├'
+            i = parent + 1
+            while i < len(prefix) - 1:
+                prefix[i] = '─'
+                i += 1
+            i = len(prefix) - 1
+            prefix[i] = ' '
+            prefix = ''.join(prefix)
+
+        print(prefix + str(self._st) + " priority:" + str(self._priority))
+        self.nodeSum += 1
+
+        l = list(self._sons)
+        i = 0
+        if len(l) > 0:
+            while i < len(l) - 1:
+                l[i].printTree(level + 1, parent=level * 4, up=up, lastChild=False)
+                i += 1
+            l[i].printTree(level + 1, parent=level * 4, up=up, lastChild=True)
+
+    def calNodeSum(self):
+        if len(self._sons) == 0:
+            return 1
+        else:
+            for i in self._sons:
+                self.nodeSum += i.calNodeSum()
+        return self.nodeSum

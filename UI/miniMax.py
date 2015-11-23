@@ -1,12 +1,8 @@
 import status
 
 class miniMax:
-<<<<<<< HEAD
-    def __init__(self, depth = 7, alphaBeta = False, init = [0] * 9):
-        self._searchPath = []
-=======
     def __init__(self, depth = 5, alphaBeta = False, init = [0] * 9):
->>>>>>> UI
+        self._searchPath = []
         self.judgePath = []
         self.changed = True
         self.depth = depth
@@ -64,16 +60,14 @@ class miniMax:
             self.changed = False
         a = self.isCompleteAndMessage(self._root.getStatus())
         if a[0] == True:
-            return [1, a[1]] + self._root.getStatus()
+            return a[1]
         ne = self._bestPath[-2].getStatus()
         a = self.isCompleteAndMessage(ne)
-        self._root.printTree()
-        print("NodeSum:" + str(self._root.calNodeSum()))
         if a[0] == False:
             self.setCurrent(ne)
-            return [0, 0]+ne
+            return ne
         else:
-            return [1, a[1]] + ne
+            return a[1]
 
 
     def isCompleteAndMessage(self,cur):
@@ -86,9 +80,9 @@ class miniMax:
 
         for i in cur:
             if i == 0:
-                return (False, 0)
+                return (False, 'Game Continue')
 
-        return (True, 0)
+        return (True, 'Draw Game')
 
     def printCurrent(self):
         self._root.printArray(self._current)
@@ -119,37 +113,39 @@ class miniMax:
         return ans
 
     def _search(self):
-        # searchPath = []
-        #
-        # mySet = set([])
-        # myStack = []
-        self._root = status.status(status=self._current)
-        #
-        # myStack.append(self._root)
-        #
-        # while len(myStack) > 0:
-        #     cur = myStack.pop()
-        #     (complete, message) = cur.isCompleteAndMessage()
-        #     if complete == True:
-        #         continue
-        #
-        #     if cur.getLevel() > self.depth:
-        #         continue
-        #
-        #     if cur not in mySet:
-        #         searchPath.append(cur)
-        #         sta = cur.getStatus()
-        #         sons = self.createSons(sta,max=cur.getMax())
-        #
-        #         for i in sons:
-        #             cur.addSonFromArray(i)
-        #
-        #         sons = set(cur.getSons())
-        #         cur.setSons(sons)
-        #
-        #         for i in sons:
-        #             myStack.append(i)
+        searchPath = []
+        judgePath = []
 
-        self._priority = self._root.getPriority(alphaBeta=self.alphaBeta, upboundLevel=self.depth)
-        self._bestPath = self._root.getBestPath(alphaBeta=self.alphaBeta, upboundLevel=self.depth)
+        mySet = set([])
+        myStack = []
+        isMax = True
+        self._root = status.status(status = self._current)
 
+        myStack.append(self._root)
+
+        while len(myStack) > 0:
+            cur = myStack.pop()
+            (complete, message) = cur.isCompleteAndMessage()
+            if complete == True:
+                continue
+
+            if cur.getLevel() > self.depth:
+                continue
+
+            if cur not in mySet:
+                searchPath.append(cur)
+                sta = cur.getStatus()
+                sons = self.createSons(sta,max = cur.getMax())
+
+                for i in sons:
+                    cur.addSonFromArray(i)
+
+                sons = set(cur.getSons())
+                cur.setSons(sons)
+
+                for i in sons:
+                    myStack.append(i)
+
+        self._searchPath = searchPath
+        self._priority = self._root.getPriority()
+        self._bestPath = self._root.getBestPath()
