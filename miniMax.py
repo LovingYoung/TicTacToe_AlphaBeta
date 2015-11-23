@@ -62,6 +62,8 @@ class miniMax:
             return [1, a[1]] + self._root.getStatus()
         ne = self._bestPath[-2].getStatus()
         a = self.isCompleteAndMessage(ne)
+        self._root.printTree()
+        print("NodeSum:" + str(self._root.calNodeSum()))
         if a[0] == False:
             self.setCurrent(ne)
             return [0, 0]+ne

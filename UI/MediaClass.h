@@ -43,11 +43,10 @@ public:
 
 
         // Build the name object
-        pName = PyString_FromString((char*)"test");
+        pName = PyString_FromString((char*)"test_noAlphaBeta");
 
         // Load the module object
         pModule = PyImport_Import(pName);
-
 
         // pDict is a borrowed reference
         pDict = PyModule_GetDict(pModule);

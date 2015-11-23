@@ -1,3 +1,4 @@
+# coding: utf-8
 class status:
     def __init__(self, status = 9 * [0], myParent = None, MAX = True):
         self._st =  status
@@ -8,6 +9,7 @@ class status:
         self._max = MAX
         self._most = None
         self.otherStatus = None
+        self.nodeSum = 1
         if self._parent != None:
             self._parent.addSon(self)
             self._level = self._parent.getLevel() + 1
@@ -86,7 +88,9 @@ class status:
         sonsPriority = []
         for i in sonsList:
             thisSon = self.addSonFromArray(i)
-            sonsPriority.append(thisSon._calPathAndPriority())
+            if thisSon is None:
+                continue
+            sonsPriority.append(thisSon._calPathAndPriority(upboundLevel=upboundLevel))
         if self._max == True:
             temp = max(sonsPriority)
         else:
@@ -107,7 +111,7 @@ class status:
                 thisSon = self.addSonFromArray(i)
                 if thisSon is None:
                     continue
-                sonsPriority.append(thisSon._calPathAndPriority_alphaBeta())
+                sonsPriority.append(thisSon._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel))
             if self._max:
                 temp = max(sonsPriority)
             else:
@@ -120,7 +124,7 @@ class status:
                 thisSon = self.addSonFromArray(i)
                 if thisSon is None:
                     continue
-                theone = thisSon._calPathAndPriority_alphaBeta()
+                theone = thisSon._calPathAndPriority_alphaBeta(upboundLevel=upboundLevel)
                 if self._max:
                     if self.otherStatus == None:
                         self.otherStatus = theone
@@ -319,3 +323,44 @@ class status:
         else:
             return False
 
+
+    def printTree(self, level = 1, parent = -1, up = list(), lastChild = False):
+        if parent == -1:
+            prefix = '└── '
+        else:
+            if parent not in up:
+                up.append(parent)
+            prefix = list(4 * level * ' ')
+            for i in up:
+                prefix[i] = '│'
+            if lastChild:
+                prefix[parent] = '└'
+                up.remove(parent)
+            else:
+                prefix[parent] = '├'
+            i = parent + 1
+            while i < len(prefix) - 1:
+                prefix[i] = '─'
+                i += 1
+            i = len(prefix) - 1
+            prefix[i] = ' '
+            prefix = ''.join(prefix)
+
+        print(prefix + str(self._st) + " priority:" + str(self._priority))
+        self.nodeSum += 1
+
+        l = list(self._sons)
+        i = 0
+        if len(l) > 0:
+            while i < len(l) - 1:
+                l[i].printTree(level + 1, parent=level * 4, up=up, lastChild=False)
+                i += 1
+            l[i].printTree(level + 1, parent=level * 4, up=up, lastChild=True)
+
+    def calNodeSum(self):
+        if len(self._sons) == 0:
+            return 1
+        else:
+            for i in self._sons:
+                self.nodeSum += i.calNodeSum()
+        return self.nodeSum
